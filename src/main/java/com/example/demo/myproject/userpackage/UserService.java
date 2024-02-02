@@ -1,16 +1,24 @@
 package com.example.demo.myproject.userpackage;
 
+import com.example.demo.myproject.config.WebSecurityConfig;
 import com.example.demo.myproject.departmentpackage.Department;
 import com.example.demo.myproject.departmentpackage.DepartmentRepository;
 import com.example.demo.myproject.userrolepackage.UserRole;
 import com.example.demo.myproject.userrolepackage.UserRoleRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     private final UserRepository userRepository;
@@ -20,10 +28,13 @@ public class UserService {
     @Autowired
     private final DepartmentRepository departmentRepository;
 
-    public UserService(UserRepository userRepository, UserRoleRepository userRoleRepository, DepartmentRepository departmentRepository) {
+    private final PasswordEncoder passwordencoder;
+
+    public UserService(UserRepository userRepository, UserRoleRepository userRoleRepository, DepartmentRepository departmentRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
         this.departmentRepository = departmentRepository;
+        this.passwordencoder = passwordEncoder;
     }
 
     public List<User> getAllUsers() {
@@ -44,7 +55,7 @@ public class UserService {
         newUser.setActive(user.isActive());
         newUser.setEmail(user.getEmail());
         newUser.setName(user.getName());
-        newUser.setPassword(user.getPassword());
+        newUser.setPassword(passwordencoder.encode(user.getPassword()));
         newUser.setSurname(user.getSurname());
 
         return userRepository.save(newUser);
@@ -65,4 +76,13 @@ public class UserService {
     }
 
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> u = Optional.ofNullable(userRepository.findByName(username));
+
+        u.get().setPassword(passwordencoder.encode(u.get().getPassword()));
+
+        return u.map(SecurityUser::new)
+                .orElseThrow(() -> new UsernameNotFoundException("Username not found " + username));
+    }
 }
