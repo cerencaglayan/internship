@@ -28,10 +28,10 @@ INSERT INTO department_type  (name)
 VALUES ('Development');
 
 INSERT INTO user_role  (name)
-VALUES ('ROLE_ADMIN');
+VALUES ('ADMIN');
 
 INSERT INTO user_role  (name)
-VALUES ('ROLE_USER');
+VALUES ('USER');
 
 INSERT INTO Department (name, company_id , department_type_id , address_street , address_town)
 VALUES ('IT', 1, 1, 'Gulbahce Teknopark', 1);
