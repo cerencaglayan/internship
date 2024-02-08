@@ -1,16 +1,16 @@
 package com.example.demo.myproject.controller;
 
-import com.example.demo.myproject.controller.dto.AuthenticationRequest;
-import com.example.demo.myproject.controller.dto.AuthenticationResponse;
-import com.example.demo.myproject.controller.dto.RegisterRequest;
+import com.example.demo.myproject.controller.dto.*;
+import com.example.demo.myproject.mail.EmailService;
 import com.example.demo.myproject.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+/*
+* everyone can achieve this area.
+*
+* */
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -18,19 +18,67 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/register")
+    private final EmailService emailService;
 
+
+    @PostMapping("/activate-user")
+    public String activate(@RequestBody ActivateRequest activateRequest) throws Exception {
+        try {
+            authenticationService.activate(activateRequest.getEmail());
+            return "Success";
+        } catch (Exception e) {
+            return "Error";
+        }
+    }
+    @GetMapping("/activate-user")
+    public String activate() {
+
+        return "activate-user page";
+    }
+
+    @PutMapping("/set-password")
+    public String setPassword(@RequestParam("token")String confirmationToken, @RequestBody PasswordRequest passwordRequest) {
+        return  authenticationService.setPassword(confirmationToken,passwordRequest.getPassword());
+    }
+    @GetMapping("/set-password")
+    public String setPassword(@RequestParam("token")String confirmationToken) {
+        return  "set-password page";
+    }
+
+    @GetMapping("/reset-password")
+    public String resetPassword() {
+        return "reset password page;";
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestBody ActivateRequest email) throws Exception {
+        try {
+            authenticationService.resetPassword(email.getEmail());
+            return "Success";
+        } catch (Exception e) {
+            return "Error";
+        }
+    }
+
+
+    @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
             @RequestBody RegisterRequest request
-    ){
+    ) {
         return ResponseEntity.ok(authenticationService.register(request));
     }
-    @PostMapping("/authenticate")
 
-    public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest request
-    ){
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+    @PostMapping("/signin")
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
 
+        return authenticate(request);
     }
+
+    private ResponseEntity<AuthenticationResponse> authenticate(
+            @RequestBody AuthenticationRequest request
+    ) {
+        return ResponseEntity.ok(authenticationService.authenticate(request));
+    }
+
+
 }

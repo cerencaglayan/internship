@@ -1,6 +1,5 @@
 package com.example.demo.myproject.controller.dto;
 
-
 import com.example.demo.myproject.models.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,12 +10,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class UserAddRequest {
     private String name;
     private String surname;
     private String email;
     private String password;
-    private String  role;
+    private String role;
+    private String department;
 
 
 }
