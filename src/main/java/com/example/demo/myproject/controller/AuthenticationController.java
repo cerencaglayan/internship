@@ -1,16 +1,15 @@
 package com.example.demo.myproject.controller;
 
 import com.example.demo.myproject.controller.dto.*;
-import com.example.demo.myproject.mail.EmailService;
 import com.example.demo.myproject.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /*
-* everyone can achieve this area.
-*
-* */
+ * everyone can achieve this area.
+ *
+ * */
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -18,18 +17,13 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    private final EmailService emailService;
-
 
     @PostMapping("/activate-user")
     public String activate(@RequestBody ActivateRequest activateRequest) throws Exception {
-        try {
-            authenticationService.activate(activateRequest.getEmail());
-            return "Success";
-        } catch (Exception e) {
-            return "Error";
-        }
+
+        return authenticationService.activate(activateRequest.getEmail());
     }
+
     @GetMapping("/activate-user")
     public String activate() {
 
@@ -37,12 +31,14 @@ public class AuthenticationController {
     }
 
     @PutMapping("/set-password")
-    public String setPassword(@RequestParam("token")String confirmationToken, @RequestBody PasswordRequest passwordRequest) {
-        return  authenticationService.setPassword(confirmationToken,passwordRequest.getPassword());
+    public String setPassword(@RequestParam("token") String confirmationToken, @RequestBody PasswordRequest
+            passwordRequest) {
+        return authenticationService.setPassword(confirmationToken, passwordRequest.getPassword());
     }
+
     @GetMapping("/set-password")
-    public String setPassword(@RequestParam("token")String confirmationToken) {
-        return  "set-password page";
+    public String setPassword(@RequestParam("token") String confirmationToken) {
+        return "set-password page";
     }
 
     @GetMapping("/reset-password")
@@ -77,7 +73,7 @@ public class AuthenticationController {
     private ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request
     ) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+        return authenticationService.authenticate(request);
     }
 
 

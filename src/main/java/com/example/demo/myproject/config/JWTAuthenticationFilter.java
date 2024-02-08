@@ -25,6 +25,14 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserDetailsService userDetailsService;
 
+    /*
+    *
+    * 1- take the header : Authorization
+    * 2- if its bearer token, extract the username(it is email for our design).
+    * 3- control if token is valid and user is not authenticated yet.
+    * 4- create new token
+    * 5- update SecurityContextHolder
+    * */
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, //
                                     @NonNull HttpServletResponse response, //
@@ -45,20 +53,19 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) // means user is not authenticated){
         {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            System.out.println("mmmğmmmm");
+            System.out.println("JWT Filter executed.");
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
                         userDetails.getAuthorities()
-                ); // needed securitycontextholder for updating.
+                );
 
 
                 authenticationToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-                // update securitycontextholder
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
 

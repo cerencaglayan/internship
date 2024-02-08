@@ -11,6 +11,9 @@ import com.example.demo.myproject.mail.token.ConfirmationToken;
 import com.example.demo.myproject.mail.token.ConfirmationTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -69,7 +72,7 @@ public class AuthenticationService {
     *  3- create token
     *  4- create response
     * */
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public ResponseEntity<AuthenticationResponse> authenticate(AuthenticationRequest request) {
 
         var user = userRepository.findByEmail(request.getEmail()).orElseThrow();
         System.out.println(user.getPassword());
@@ -80,34 +83,40 @@ public class AuthenticationService {
 
         var jwtToken = jwtService.generateToken(user);
 
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + jwtToken); // Token başlığını ayarla
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .headers(headers)
+                .body(AuthenticationResponse.builder().token(jwtToken).build());
     }
 
     /*
-     *  1- find user from email adress
-     *  2- send mail to provided email adress
+     *  1- find user from email address
+     *  2- send mail to provided email address
+     *  3- Catch and print the error if there is any
      *
      * */
-    public String activate(String email) throws Exception {
-        User user1;
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent()) {
-            user1 = user.get();
-        } else {
-            throw new UsernameNotFoundException("The email is not in DB.");
+    public String activate(String email) {
+        try {
+            Optional<User> user = userRepository.findByEmail(email);
+            if (user.isPresent()) {
+                User user1 = user.get();
+                if (user1.isActive()) {
+                    throw new Exception("The user is already active");
+                }
+                if (sendMail(user1).equals("Success")) {
+                    return "Success";
+                } else {
+                    return "Something unexpected.";
+                }
+            } else {
+                throw new UsernameNotFoundException("The email is not in DB.");
+            }
+        } catch (Exception e) {
+            return e.getMessage();
         }
-
-        if (user.isEmpty()) throw new Exception();
-
-        if (sendMail(user1).equals("Success")) {
-            return "Success";
-
-        } else return ":(";
-
-
-
     }
 
     /*
@@ -223,10 +232,10 @@ public class AuthenticationService {
                 sendMail(user.get());
                 return;
             }
-            System.out.println("aktif değilsin? sg");
+            System.out.println("User is not active");
         }
         else{
-            System.out.println("yok ki ammmına");
+            System.out.println("Username is not in db.");
         }
     }
 }

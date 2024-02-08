@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         request ->
                                 request.requestMatchers("/api/v1/auth/**", "/error").permitAll()
-                       // .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN")
+                    //  .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN") inside of AdminController with @PreAuthorize
                         .requestMatchers("/api/v1/user/**").hasAnyRole("USER")
                         .anyRequest().permitAll())
                 .sessionManagement(sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
