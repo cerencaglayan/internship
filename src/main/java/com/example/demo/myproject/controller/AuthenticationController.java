@@ -1,6 +1,7 @@
 package com.example.demo.myproject.controller;
 
 import com.example.demo.myproject.controller.dto.*;
+import com.example.demo.myproject.exception.TokenExpiredException;
 import com.example.demo.myproject.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public class AuthenticationController {
 
     @PutMapping("/set-password")
     public String setPassword(@RequestParam("token") String confirmationToken, @RequestBody PasswordRequest
-            passwordRequest) {
+            passwordRequest) throws TokenExpiredException {
         return authenticationService.setPassword(confirmationToken, passwordRequest.getPassword());
     }
 
@@ -52,7 +53,7 @@ public class AuthenticationController {
             authenticationService.resetPassword(email.getEmail());
             return "Success";
         } catch (Exception e) {
-            return "Error";
+            return e.getMessage();
         }
     }
 

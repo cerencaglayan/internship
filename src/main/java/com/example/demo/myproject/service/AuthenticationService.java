@@ -2,13 +2,15 @@ package com.example.demo.myproject.service;
 
 import com.example.demo.myproject.controller.dto.AuthenticationRequest;
 import com.example.demo.myproject.controller.dto.AuthenticationResponse;
-import com.example.demo.myproject.controller.dto.RegisterRequest;
+import com.example.demo.myproject.exception.PasswordNotValidException;
+import com.example.demo.myproject.exception.TokenExpiredException;
+import com.example.demo.myproject.exception.UserAlreadyActiveException;
 import com.example.demo.myproject.mail.EmailService;
+import com.example.demo.myproject.mail.token.ConfirmationToken;
+import com.example.demo.myproject.mail.token.ConfirmationTokenRepository;
 import com.example.demo.myproject.models.User;
 import com.example.demo.myproject.repository.UserRepository;
 import com.example.demo.myproject.repository.UserRoleRepository;
-import com.example.demo.myproject.mail.token.ConfirmationToken;
-import com.example.demo.myproject.mail.token.ConfirmationTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -42,11 +44,11 @@ public class AuthenticationService {
 
 
     /*
-    *  1- find the user
-    *  2- authenticate user with both mail and password
-    *  3- create token
-    *  4- create response
-    * */
+     *  1- find the user
+     *  2- authenticate user with both mail and password
+     *  3- create token
+     *  4- create response
+     * */
     public ResponseEntity<AuthenticationResponse> authenticate(AuthenticationRequest request) {
 
         var user = userRepository.findByEmail(request.getEmail()).orElseThrow();
@@ -79,13 +81,15 @@ public class AuthenticationService {
             if (user.isPresent()) {
                 User user1 = user.get();
                 if (user1.isActive()) {
-                    throw new Exception("The user is already active");
+                    throw new UserAlreadyActiveException("User already active in db.");
                 }
+
                 if (sendMail(user1).equals("Success")) {
-                    return "Success";
-                } else {
-                    return "Something unexpected.";
+                    return "";
                 }
+
+                throw new Exception("Something Unexpected in mail sending.");
+
             } else {
                 throw new UsernameNotFoundException("The email is not in DB.");
             }
@@ -95,11 +99,11 @@ public class AuthenticationService {
     }
 
     /*
-    *  1- create token with using user
-    *  2- save token to repository
-    *  3- create mail message
-    *  4- send link to provided mail from user
-    * */
+     *  1- create token with using user
+     *  2- save token to repository
+     *  3- create mail message
+     *  4- send link to provided mail from user
+     * */
     private String sendMail(User user) {
 
 
@@ -119,72 +123,76 @@ public class AuthenticationService {
     }
 
 
-
     /*
      *  1- control if token expired
      *  2- control if password valid
      *  3- update user from repository
      *
      * */
-    public String setPassword(String confirmationToken, String password) {
+    public String setPassword(String confirmationToken, String password) throws TokenExpiredException {
 
         ConfirmationToken confirmationToken1 = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
-        if (!isTokenExpired(confirmationToken1)) {
-            if (passwordValid(password)) {
+        try{
+            if (!isTokenExpired(confirmationToken1)) {
+                String result = passwordValid(password);
+                if (result.equals("ok")) {
 
-                User user = confirmationToken1.getUser();
-                user.setPassword(passwordEncoder.encode(password));
-                user.setActive(true);
-                userRepository.save(user);
-                System.out.println("user saved\n");
-                confirmationTokenRepository.delete(confirmationToken1);
-                System.out.println("token deleted.\n");
+                    User user = confirmationToken1.getUser();
+                    user.setPassword(passwordEncoder.encode(password));
+                    user.setActive(true);
+                    userRepository.save(user);
+                    System.out.println("user saved\n");
+                    confirmationTokenRepository.delete(confirmationToken1);
+                    System.out.println("token deleted.\n");
+                    return HttpStatus.OK.toString();
+
+                }
+                else {
+                    throw new PasswordNotValidException(result);
+
+                }
 
             } else {
-                System.out.println("invalid password");
+                confirmationTokenRepository.delete(confirmationToken1);
+                throw new TokenExpiredException("Token is expired.");
             }
-
-        } else {
-            System.out.println("token is expired\n");
-            confirmationTokenRepository.delete(confirmationToken1);
-            System.out.println("token deleted.\n");
-            return "";
+        }
+        catch (Exception e){
+            return e.getMessage();
         }
 
-        return "activated";
     }
 
 
-    private boolean passwordValid(String password) {
+    private String passwordValid(String password) {
 
-        // Rule 1: Must have at least one uppercase character
+        String message = "ok";
+
         if (password.equals(password.toLowerCase())) {
-            System.out.println(" Must have at least one uppercase character.");
-            return false;
+            message = "Must have at least one uppercase character";
         }
 
-        // Rule 2: Must have at least one lowercase character
         if (password.equals(password.toUpperCase())) {
-            System.out.println("Must have at least one lowercase character.");
-            return false;
+            message = "Must have at least one lowercase character";
         }
 
         // Rule 3: Must have at least one numeric character
         if (!password.matches(".*\\d.*")) {
-            System.out.println("Must have at least one numeric character.");
-            return false;
+            message = "Must have at least one numeric character";
         }
 
         // Rule 4: Must have at least one special symbol among @$.!-+
         if (!Pattern.compile("[@$.!\\-+]").matcher(password).find()) {
-            System.out.println("Must have at least one special symbol among @$.!-+");
-            return false;
+            message = "Must have at least one special symbol among @$.!-+";
         }
 
-        // Rule 5: Password length should be between 8 and 20
         int length = password.length();
-        System.out.println(length);
-        return length >= 8 && length <= 20;
+        if (!(length >= 8 && length <= 20)) {
+            message = "Password length should be between 8 and 20";
+        }
+
+        return message;
+
     }
 
     private boolean isTokenExpired(ConfirmationToken token) {
@@ -192,23 +200,22 @@ public class AuthenticationService {
     }
 
     /*
-    *  1- take the user
-    *  2- check if user is active
-    *  3- send mail to user's mail
-    *
-    * */
+     *  1- take the user
+     *  2- check if user is active
+     *  3- send mail to user's mail
+     *
+     * */
 
     public void resetPassword(String email) {
         Optional<User> user = userRepository.findByEmail(email);
 
-        if (user.isPresent() ){
-            if ( user.get().isActive()){
+        if (user.isPresent()) {
+            if (user.get().isActive()) {
                 sendMail(user.get());
                 return;
             }
             System.out.println("User is not active");
-        }
-        else{
+        } else {
             System.out.println("Username is not in db.");
         }
     }
