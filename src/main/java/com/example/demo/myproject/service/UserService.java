@@ -40,9 +40,7 @@ public class UserService {
         this.passwordencoder = passwordEncoder;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+
 
     public User getUserById(Integer userId) {
         return userRepository.findById(userId).orElse(null);
