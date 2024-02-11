@@ -40,32 +40,7 @@ public class AuthenticationService {
     @Value("${spring.mail.username}")
     private String fromMail;
 
-    /*
 
-    This is not for demo app. rn.
-
-    * 1- find role
-    * 2- create user
-    * 3- create token
-    * */
-    public AuthenticationResponse register(RegisterRequest request) {
-        var role = roleRepository.findByName(request.getRole());
-        System.out.println(role.getName() + "of");
-        var user = User.builder()
-                .name(request.getName())
-                .surname(request.getSurname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .userRole(role)
-                .build();
-        userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
-
-    }
     /*
     *  1- find the user
     *  2- authenticate user with both mail and password
