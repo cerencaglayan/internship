@@ -126,7 +126,6 @@ public class AuthenticationService {
     *  4- send link to provided mail from user
     * */
     private String sendMail(User user) {
-        System.out.println("ananınamı");
 
 
         ConfirmationToken confirmationToken = new ConfirmationToken(user);

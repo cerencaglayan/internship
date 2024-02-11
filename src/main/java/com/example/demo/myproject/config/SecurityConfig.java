@@ -34,14 +34,15 @@ public class SecurityConfig {
                                                             HttpSecurity http
                                                     ) throws Exception {
 
-        return  http
+        return http
+                //.requiresChannel(channel -> channel.anyRequest().requiresSecure())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         request ->
-                                request.requestMatchers("/api/v1/auth/**", "/error").permitAll()
-                    //  .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN") inside of AdminController with @PreAuthorize
-                        .requestMatchers("/api/v1/user/**").hasAnyRole("USER")
-                        .anyRequest().permitAll())
+                                request
+                                        .requestMatchers("/api/v1/auth/**", "/error").permitAll()
+                                        .requestMatchers("/api/v1/user/**").hasAnyRole("USER")
+                                        .anyRequest().permitAll())
                 .sessionManagement(sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
