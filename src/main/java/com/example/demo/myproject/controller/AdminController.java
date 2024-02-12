@@ -34,5 +34,9 @@ public class AdminController {
         return adminService.getAllUsers();
     }
 
+    @GetMapping("/users/{id}")
+    public ResponseEntity<UserDto> getUserById(@PathVariable("id") Integer id) {
+        return adminService.getUserById(id);
+    }
 
 }

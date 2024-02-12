@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
 @Data
 @Builder
@@ -14,5 +15,7 @@ public class UserDto {
     private String surname;
     private String email;
     private String role;
+
+    @Nullable
     private String department;
 }

@@ -5,6 +5,7 @@ import com.example.demo.myproject.controller.dto.AuthenticationResponse;
 import com.example.demo.myproject.exception.PasswordNotValidException;
 import com.example.demo.myproject.exception.TokenExpiredException;
 import com.example.demo.myproject.exception.UserAlreadyActiveException;
+import com.example.demo.myproject.exception.UserIsNotActiveException;
 import com.example.demo.myproject.mail.EmailService;
 import com.example.demo.myproject.mail.token.ConfirmationToken;
 import com.example.demo.myproject.mail.token.ConfirmationTokenRepository;
@@ -120,6 +121,7 @@ public class AuthenticationService {
 
         emailService.sendEmail(mailMessage);
         return "Success";
+
     }
 
 
@@ -129,10 +131,10 @@ public class AuthenticationService {
      *  3- update user from repository
      *
      * */
-    public String setPassword(String confirmationToken, String password) throws TokenExpiredException {
+    public String setPassword(String confirmationToken, String password) {
 
         ConfirmationToken confirmationToken1 = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
-        try{
+        try {
             if (!isTokenExpired(confirmationToken1)) {
                 String result = passwordValid(password);
                 if (result.equals("ok")) {
@@ -146,8 +148,7 @@ public class AuthenticationService {
                     System.out.println("token deleted.\n");
                     return HttpStatus.OK.toString();
 
-                }
-                else {
+                } else {
                     throw new PasswordNotValidException(result);
 
                 }
@@ -156,8 +157,7 @@ public class AuthenticationService {
                 confirmationTokenRepository.delete(confirmationToken1);
                 throw new TokenExpiredException("Token is expired.");
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return e.getMessage();
         }
 
@@ -167,28 +167,26 @@ public class AuthenticationService {
     private String passwordValid(String password) {
 
         String message = "ok";
+        int length = password.length();
 
-        if (password.equals(password.toLowerCase())) {
-            message = "Must have at least one uppercase character";
+        if (!(length >= 8 && length <= 20)) {
+            message = "Password length should be between 8 and 20";
+        }
+
+        if (!Pattern.compile("[@$.!\\-+]").matcher(password).find()) {
+            message = "Must have at least one special symbol among @$.!-+";
+        }
+
+        if (!password.matches(".*\\d.*")) {
+            message = "Must have at least one numeric character";
         }
 
         if (password.equals(password.toUpperCase())) {
             message = "Must have at least one lowercase character";
         }
 
-        // Rule 3: Must have at least one numeric character
-        if (!password.matches(".*\\d.*")) {
-            message = "Must have at least one numeric character";
-        }
-
-        // Rule 4: Must have at least one special symbol among @$.!-+
-        if (!Pattern.compile("[@$.!\\-+]").matcher(password).find()) {
-            message = "Must have at least one special symbol among @$.!-+";
-        }
-
-        int length = password.length();
-        if (!(length >= 8 && length <= 20)) {
-            message = "Password length should be between 8 and 20";
+        if (password.equals(password.toLowerCase())) {
+            message = "Must have at least one uppercase character";
         }
 
         return message;
@@ -206,17 +204,25 @@ public class AuthenticationService {
      *
      * */
 
-    public void resetPassword(String email) {
+    public ResponseEntity<String> resetPassword(String email) {
         Optional<User> user = userRepository.findByEmail(email);
+        String message = "Email has been sent.";
+        try {
+            if (user.isPresent()) {
+                if (user.get().isActive()) {
+                    sendMail(user.get());
 
-        if (user.isPresent()) {
-            if (user.get().isActive()) {
-                sendMail(user.get());
-                return;
+                }
+
+                throw new UserIsNotActiveException("User is not active.");
             }
-            System.out.println("User is not active");
-        } else {
-            System.out.println("Username is not in db.");
+            throw new UsernameNotFoundException("User is not found.");
+        } catch (Exception e) {
+            message = e.getMessage();
         }
+
+        return ResponseEntity.ok().body(message);
+
+
     }
 }

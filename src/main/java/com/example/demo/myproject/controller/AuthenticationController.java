@@ -48,15 +48,11 @@ public class AuthenticationController {
     }
 
     @PostMapping("/reset-password")
-    public String resetPassword(@RequestBody ActivateRequest email) throws Exception {
-        try {
-            authenticationService.resetPassword(email.getEmail());
-            return "Success";
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
+    public ResponseEntity<String> resetPassword(@RequestBody ActivateRequest email)  {
 
+          return  authenticationService.resetPassword(email.getEmail());
+
+    }
 
 
     @PostMapping("/signin")

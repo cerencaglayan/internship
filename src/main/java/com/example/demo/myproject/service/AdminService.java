@@ -13,11 +13,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -69,21 +71,49 @@ public class AdminService {
         List<UserDto> userDtos = new ArrayList<>();
 
         for (User user : users) {
-            // Do something with each user
             userDtos.add(
                     UserDto.builder()
+                            .email(user.getEmail())
                             .name(user.getName())
                             .surname(user.getSurname())
-                            .role(user.getUserRole().getName())
-                            .department(user.getDepartment().getName())
+                            .role(Optional.ofNullable(user.getUserRole()).get().getName())
+                            .department(Optional.ofNullable(user.getDepartment()).get().getName())
                             .build()
             );
 
         }
 
-
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userDtos);
     }
+
+    /*
+    *  Finds user, if not, 404 code.
+    *
+    * */
+
+    public ResponseEntity<UserDto> getUserById(Integer id) {
+        Optional<User> userOptional = userRepository.findById(id);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(
+                            UserDto.builder()
+                                    .name(user.getName())
+                                    .surname(user.getSurname())
+                                    .role(user.getUserRole().getName())
+                                    .department(user.getDepartment().getName())
+                                    .build()
+                    );
+        } else {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(null);
+        }
+
+
+    }
+
 }

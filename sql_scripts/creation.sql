@@ -37,5 +37,5 @@ INSERT INTO department (name, company_id , department_type_id , address_street ,
 VALUES ('IT', 1, 1, 'Gulbahce Teknopark', 1);
 
 INSERT INTO user (user_role_id , department_id , name, surname, email , password, is_active)
-VALUES (1, 1, 'Ceren', 'Çağlayan', 'cer79cag@gmail.com', 'aaaa', 1);
+VALUES (1, 1, 'Ceren', 'Çağlayan', 'cer79cag@gmail.com', '', 1);
 
