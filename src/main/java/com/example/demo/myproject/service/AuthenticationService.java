@@ -211,6 +211,7 @@ public class AuthenticationService {
             if (user.isPresent()) {
                 if (user.get().isActive()) {
                     sendMail(user.get());
+                    return null;
 
                 }
 
