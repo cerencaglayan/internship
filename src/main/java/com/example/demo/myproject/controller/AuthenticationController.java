@@ -54,6 +54,11 @@ public class AuthenticationController {
 
     }
 
+    @GetMapping("/signin")
+    public String login() {
+
+        return "login page";
+    }
 
     @PostMapping("/signin")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
