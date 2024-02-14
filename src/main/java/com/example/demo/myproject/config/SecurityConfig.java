@@ -41,6 +41,7 @@ public class SecurityConfig {
                         request ->
                                 request
                                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
+                                        .requestMatchers("/", "/error").permitAll()
                                         .requestMatchers("/api/v1/user/**").hasAnyRole("USER")
                                         .anyRequest().permitAll())
                 .sessionManagement(sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

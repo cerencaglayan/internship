@@ -4,6 +4,7 @@ import com.example.demo.myproject.controller.dto.*;
 import com.example.demo.myproject.exception.TokenExpiredException;
 import com.example.demo.myproject.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

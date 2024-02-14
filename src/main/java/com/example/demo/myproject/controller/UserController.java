@@ -37,18 +37,6 @@ public class UserController {
 
 
 
-
-
-
-
-    @PostMapping("/resetpassword")
-    public String resetPassword(@RequestBody User user) {
-        if (user.isActive()) {
-
-        }
-        return "aktif değilsen naş";
-    }
-
     /*
      * will implement later
      * */

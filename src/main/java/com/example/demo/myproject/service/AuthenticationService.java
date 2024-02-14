@@ -52,8 +52,9 @@ public class AuthenticationService {
      * */
     public ResponseEntity<AuthenticationResponse> authenticate(AuthenticationRequest request) {
 
-        var user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-        System.out.println(user.getPassword());
+
+        var user = userRepository.findByEmail(request.getEmail()).orElseThrow( () -> new UsernameNotFoundException("not found"));             ;
+        System.out.println(user.getEmail());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
@@ -117,7 +118,7 @@ public class AuthenticationService {
         mailMessage.setSubject("Complete Registration!");
         mailMessage.setFrom(fromMail);
         mailMessage.setText("To confirm your account, please click here : "
-                + "http://localhost:8080/api/v1/auth/set-password?token=" + confirmationToken.getConfirmationToken());
+                + "https://delta.eu-west-1.elasticbeanstalk.com/api/v1/auth/set-password?token=" + confirmationToken.getConfirmationToken());
 
         emailService.sendEmail(mailMessage);
         return "Success";
