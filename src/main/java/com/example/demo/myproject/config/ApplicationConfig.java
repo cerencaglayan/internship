@@ -37,10 +37,11 @@ public class ApplicationConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        // Allow anyone and anything access. Probably ok for Swagger spec
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
+        config.addAllowedOrigin("https://company-organization-software-lilac.vercel.app/");
         config.addAllowedOrigin("https://company-organization-software-lilac.vercel.app");
+        config.setAllowedOriginPatterns(java.util.List.of("*"));
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 

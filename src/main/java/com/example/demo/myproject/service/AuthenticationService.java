@@ -61,7 +61,7 @@ public class AuthenticationService {
 
 
         var jwtToken = jwtService.generateToken(user);
-
+        System.out.println(jwtToken);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + jwtToken); // Token başlığını ayarla
 
@@ -118,8 +118,9 @@ public class AuthenticationService {
         mailMessage.setSubject("Complete Registration!");
         mailMessage.setFrom(fromMail);
         mailMessage.setText("To confirm your account, please click here : "
-                + "https://delta.eu-west-1.elasticbeanstalk.com/api/v1/auth/set-password?token=" + confirmationToken.getConfirmationToken());
-
+              //  + "http://localhost:8080/api/v1/auth/set-password/" + confirmationToken.getConfirmationToken());
+             //   + "https://company-organization-software-lilac.vercel.app/SetNewPassword/" + confirmationToken.getConfirmationToken());
+                   + "https://delta.eu-west-1.elasticbeanstalk.com/api/v1/auth/set-password/" + confirmationToken.getConfirmationToken());
         emailService.sendEmail(mailMessage);
         return "Success";
 
@@ -132,9 +133,9 @@ public class AuthenticationService {
      *  3- update user from repository
      *
      * */
-    public String setPassword(String confirmationToken, String password) {
+    public String setPassword(String token, String password) {
 
-        ConfirmationToken confirmationToken1 = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
+        ConfirmationToken confirmationToken1 = confirmationTokenRepository.findByConfirmationToken(token);
         try {
             if (!isTokenExpired(confirmationToken1)) {
                 String result = passwordValid(password);
@@ -226,5 +227,10 @@ public class AuthenticationService {
         return ResponseEntity.ok().body(message);
 
 
+    }
+
+    public String isTokenActive(String token) {
+        ConfirmationToken confirmationToken1 = confirmationTokenRepository.findByConfirmationToken(token);
+        return String.valueOf(!isTokenExpired(confirmationToken1));
     }
 }

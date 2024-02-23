@@ -32,15 +32,20 @@ public class AuthenticationController {
         return "activate-user page";
     }
 
-    @PutMapping("/set-password")
-    public String setPassword(@RequestParam("token") String confirmationToken, @RequestBody PasswordRequest
+    @PutMapping("/set-password/{token}")
+    public String setPassword(@PathVariable("token") String token, @RequestBody PasswordRequest
             passwordRequest) throws TokenExpiredException {
-        return authenticationService.setPassword(confirmationToken, passwordRequest.getPassword());
+        return authenticationService.setPassword(token, passwordRequest.getPassword());
     }
 
-    @GetMapping("/set-password")
-    public String setPassword(@RequestParam("token") String confirmationToken) {
+    @GetMapping("/set-password/{token}")
+    public String setPassword(@PathVariable("token") String token) {
         return "set-password page";
+    }
+
+    @GetMapping("/is-token-active/{token}")
+    public String isTokenActive(@PathVariable("token") String token) {
+        return authenticationService.isTokenActive(token);
     }
 
     @GetMapping("/reset-password")

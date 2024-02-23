@@ -1,15 +1,14 @@
 package com.example.demo.myproject.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@NoArgsConstructor
+
 @AllArgsConstructor
+@NoArgsConstructor
 @Setter
 @Getter
+@Builder
 @Entity
 @Table(name = "City")
 public class City {

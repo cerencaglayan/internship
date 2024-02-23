@@ -33,9 +33,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
                                                             HttpSecurity http
                                                     ) throws Exception {
-
         return http
                 //.requiresChannel(channel -> channel.anyRequest().requiresSecure())
+               .cors()
+                .and()
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         request ->
@@ -43,12 +44,13 @@ public class SecurityConfig {
                                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                                         .requestMatchers("/", "/error").permitAll()
                                         .requestMatchers("/api/v1/user/**").hasAnyRole("USER")
+                                        .requestMatchers("/auth/**","/swagger-ui/**","/swagger-ui.html","/api-docs/**")
+                                        .permitAll()
                                         .anyRequest().permitAll())
                 .sessionManagement(sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-
     }
 
 

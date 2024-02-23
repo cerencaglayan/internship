@@ -31,4 +31,6 @@ public class Town {
     private City city;
 
 
+    public Town(String name) {
+    }
 }
