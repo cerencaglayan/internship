@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
+/**
+ * user adding request for admin. adding photo is not exist for now.
+ */
 
 @Data
 @Builder

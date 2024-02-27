@@ -14,6 +14,8 @@ import com.example.demo.myproject.repository.UserRepository;
 import com.example.demo.myproject.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +41,8 @@ public class AuthenticationService {
     private final JWTService jwtService;
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
+    private final MessageSource messageSource;
+
 
     @Value("${spring.mail.username}")
     private String fromMail;
@@ -53,7 +57,8 @@ public class AuthenticationService {
     public ResponseEntity<AuthenticationResponse> authenticate(AuthenticationRequest request) {
 
 
-        var user = userRepository.findByEmail(request.getEmail()).orElseThrow( () -> new UsernameNotFoundException("not found"));             ;
+        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new UsernameNotFoundException(""));
+        ;
         System.out.println(user.getEmail());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
@@ -63,7 +68,7 @@ public class AuthenticationService {
         var jwtToken = jwtService.generateToken(user);
         System.out.println(jwtToken);
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + jwtToken); // Token başlığını ayarla
+        headers.add("Authorization", "Bearer " + jwtToken);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -83,17 +88,21 @@ public class AuthenticationService {
             if (user.isPresent()) {
                 User user1 = user.get();
                 if (user1.isActive()) {
-                    throw new UserAlreadyActiveException("User already active in db.");
+                    throw new UserAlreadyActiveException(
+                            messageSource.getMessage("error.user.exists",
+                                    null, LocaleContextHolder.getLocale()));
                 }
 
                 if (sendMail(user1).equals("Success")) {
-                    return "";
+                    return messageSource.getMessage("mail.message.success",
+                            null, LocaleContextHolder.getLocale());
                 }
 
-                throw new Exception("Something Unexpected in mail sending.");
+                throw new Exception(messageSource.getMessage("error.message.unexpected", null, LocaleContextHolder.getLocale()));
 
             } else {
-                throw new UsernameNotFoundException("The email is not in DB.");
+                throw new UsernameNotFoundException(messageSource.getMessage("error.user.notfound",
+                        null, LocaleContextHolder.getLocale()));
             }
         } catch (Exception e) {
             return e.getMessage();
@@ -110,17 +119,16 @@ public class AuthenticationService {
 
 
         ConfirmationToken confirmationToken = new ConfirmationToken(user);
-        System.out.println("token is saving ...");
         confirmationTokenRepository.save(confirmationToken);
 
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(user.getEmail());
-        mailMessage.setSubject("Complete Registration!");
+        mailMessage.setSubject(messageSource.getMessage("mail.message.subject", null, LocaleContextHolder.getLocale()));
         mailMessage.setFrom(fromMail);
-        mailMessage.setText("To confirm your account, please click here : "
-              //  + "http://localhost:8080/api/v1/auth/set-password/" + confirmationToken.getConfirmationToken());
-             //   + "https://company-organization-software-lilac.vercel.app/SetNewPassword/" + confirmationToken.getConfirmationToken());
-                   + "https://delta.eu-west-1.elasticbeanstalk.com/api/v1/auth/set-password/" + confirmationToken.getConfirmationToken());
+        mailMessage.setText(messageSource.getMessage("mail.message.text", null, LocaleContextHolder.getLocale())
+                + "http://localhost:8080/api/v1/auth/set-password/" + confirmationToken.getConfirmationToken());
+        //   + "https://company-organization-software-lilac.vercel.app/SetNewPassword/" + confirmationToken.getConfirmationToken());
+        //     + "https://delta.eu-west-1.elasticbeanstalk.com/api/v1/auth/set-password/" + confirmationToken.getConfirmationToken());
         emailService.sendEmail(mailMessage);
         return "Success";
 
@@ -157,7 +165,9 @@ public class AuthenticationService {
 
             } else {
                 confirmationTokenRepository.delete(confirmationToken1);
-                throw new TokenExpiredException("Token is expired.");
+                throw new TokenExpiredException(
+                        messageSource.getMessage("error.message.tokenexpired", null, LocaleContextHolder.getLocale())
+                );
             }
         } catch (Exception e) {
             return e.getMessage();
@@ -172,23 +182,23 @@ public class AuthenticationService {
         int length = password.length();
 
         if (!(length >= 8 && length <= 20)) {
-            message = "Password length should be between 8 and 20";
+            message = messageSource.getMessage("password.message.length", null, LocaleContextHolder.getLocale());
         }
 
         if (!Pattern.compile("[@$.!\\-+]").matcher(password).find()) {
-            message = "Must have at least one special symbol among @$.!-+";
+            message = messageSource.getMessage("password.message.symbol", null, LocaleContextHolder.getLocale());
         }
 
         if (!password.matches(".*\\d.*")) {
-            message = "Must have at least one numeric character";
+            message = messageSource.getMessage("password.message.numeric", null, LocaleContextHolder.getLocale());
         }
 
         if (password.equals(password.toUpperCase())) {
-            message = "Must have at least one lowercase character";
+            message = messageSource.getMessage("password.message.lowercase", null, LocaleContextHolder.getLocale());
         }
 
         if (password.equals(password.toLowerCase())) {
-            message = "Must have at least one uppercase character";
+            message = messageSource.getMessage("password.message.uppercase", null, LocaleContextHolder.getLocale());
         }
 
         return message;
@@ -208,18 +218,27 @@ public class AuthenticationService {
 
     public ResponseEntity<String> resetPassword(String email) {
         Optional<User> user = userRepository.findByEmail(email);
-        String message = "Email has been sent.";
+
+        String message=messageSource.getMessage("mail.message.success",
+                null, LocaleContextHolder.getLocale());
+
         try {
             if (user.isPresent()) {
                 if (user.get().isActive()) {
                     sendMail(user.get());
-                    return null;
 
+                } else {
+
+                    throw new UserIsNotActiveException(
+                            messageSource.getMessage("error.user.notactive", null, LocaleContextHolder.getLocale())
+                    );
                 }
-
-                throw new UserIsNotActiveException("User is not active.");
             }
-            throw new UsernameNotFoundException("User is not found.");
+            else {
+                throw new UsernameNotFoundException(
+                        messageSource.getMessage("error.user.notfound", null, LocaleContextHolder.getLocale())
+                );
+            }
         } catch (Exception e) {
             message = e.getMessage();
         }

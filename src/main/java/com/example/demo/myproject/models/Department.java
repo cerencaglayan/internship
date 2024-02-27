@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
@@ -19,6 +22,17 @@ public class Department {
     private Integer id;
 
     private String name;
+
+    @ManyToMany(mappedBy = "parentDepartments")
+    private List<Department> childDepartments;
+
+    @ManyToMany
+    @JoinTable(
+            name = "department_hierarchy",
+            joinColumns = @JoinColumn(name = "child_department_id"),
+            inverseJoinColumns = @JoinColumn(name = "parent_department_id")
+    )
+    private List<Department> parentDepartments;
 
     @ManyToOne
     @JoinColumn(name = "companyId", nullable = false)

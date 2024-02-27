@@ -31,12 +31,19 @@ public class User implements UserDetails {
     private Department department;
 
     private String name;
+
     private String surname;
+
     private String email;
+
     private String password = null;
 
     @Column(name = "isActive")
     private boolean isActive = false;
+
+    @Lob
+    @Column(name = "profile_photo",columnDefinition = "LONGBLOB")
+    private String image = null;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
