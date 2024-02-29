@@ -9,8 +9,10 @@ import com.example.demo.myproject.repository.DepartmentRepository;
 import com.example.demo.myproject.repository.UserRepository;
 import com.example.demo.myproject.repository.UserRoleRepository;
 import com.example.demo.myproject.service.utils.ImageUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,15 +33,18 @@ public class UserService {
     private final UserRoleRepository userRoleRepository;
     private final DepartmentRepository departmentRepository;
 
+    private final JWTService jwtService;
+
     private final PasswordEncoder passwordencoder;
 
     private static final String UPLOAD_DIR = "src/main/uploads/photos/";
 
 
-    public UserService(UserRepository userRepository, UserRoleRepository userRoleRepository, DepartmentRepository departmentRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, UserRoleRepository userRoleRepository, DepartmentRepository departmentRepository, JWTService jwtService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
         this.departmentRepository = departmentRepository;
+        this.jwtService = jwtService;
         this.passwordencoder = passwordEncoder;
     }
 
@@ -52,7 +57,9 @@ public class UserService {
      *  5- save repository
      *
      * */
-    public String addUser(UserAddRequest user) {
+
+
+    public ResponseEntity<UserDto> addUser(UserAddRequest user) {
         User newUser = new User();
 
         UserRole userRole = userRoleRepository.findByName(user.getRole());
@@ -68,11 +75,15 @@ public class UserService {
 
 
         userRepository.save(newUser);
-        return "Success!";
+
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(getUserById(newUser.getId()).getBody());
     }
 
     /*
-     * todo null değeri handle etme oonarılacak.
+     * todo null değeri handle etme onarılacak.
      *
      * */
     public ResponseEntity<List<UserDto>> getAllUsers() {
@@ -126,10 +137,19 @@ public class UserService {
     }
 
 
-    public ResponseEntity<UserDto> landing(Integer id) {
+    public ResponseEntity<UserDto> landing(Integer id,@NonNull HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String userEmail;
+        jwt = authHeader.substring(7);
+        userEmail = jwtService.extractUsername(jwt);
         Optional<User> userOptional = userRepository.findById(id);
 
         if (userOptional.isPresent()) {
+            if (!userOptional.get().getEmail().equals(userEmail)){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(null);
+            }
 
             User user = userOptional.get();
             String roleName = user.getUserRole() != null ? user.getUserRole().getName() : null;

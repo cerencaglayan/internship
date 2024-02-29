@@ -126,8 +126,8 @@ public class AuthenticationService {
         mailMessage.setSubject(messageSource.getMessage("mail.message.subject", null, LocaleContextHolder.getLocale()));
         mailMessage.setFrom(fromMail);
         mailMessage.setText(messageSource.getMessage("mail.message.text", null, LocaleContextHolder.getLocale())
-                + "http://localhost:8080/api/v1/auth/set-password/" + confirmationToken.getConfirmationToken());
-        //   + "https://company-organization-software-lilac.vercel.app/SetNewPassword/" + confirmationToken.getConfirmationToken());
+          //      + "http://localhost:8080/api/v1/auth/set-password/" + confirmationToken.getConfirmationToken());
+           + "https://company-organization-software-lilac.vercel.app/SetNewPassword/" + confirmationToken.getConfirmationToken());
         //     + "https://delta.eu-west-1.elasticbeanstalk.com/api/v1/auth/set-password/" + confirmationToken.getConfirmationToken());
         emailService.sendEmail(mailMessage);
         return "Success";

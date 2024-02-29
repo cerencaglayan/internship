@@ -22,6 +22,7 @@ public class RegionController {
     public List<Region> getRegions(){
         return  regionService.getRegions();
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<Region> getRegionById(@PathVariable Integer id) {
         return regionService.getRegionById(id);

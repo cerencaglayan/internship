@@ -48,6 +48,16 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         //
+        /**
+         *
+         *      @NonNull HttpServletRequest request
+         *
+         *          final String authHeader = request.getHeader("Authorization");
+         *         jwt = authHeader.substring(7);
+         *         userEmail = jwtService.extractUsername(jwt);
+         *         
+         */
+
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractUsername(jwt);
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) // means user is not authenticated){

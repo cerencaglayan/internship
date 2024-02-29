@@ -3,10 +3,12 @@ package com.example.demo.myproject.controller;
 import com.example.demo.myproject.controller.dto.UserAddRequest;
 import com.example.demo.myproject.controller.dto.UserDto;
 import com.example.demo.myproject.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,9 +36,9 @@ public class UserController {
     }
 
     @GetMapping("/landing/{id}")
-    public ResponseEntity<UserDto> landing(@PathVariable Integer id) {
+    public ResponseEntity<UserDto> landing(@PathVariable Integer id, @NonNull HttpServletRequest request) {
 
-        return userService.landing(id);
+        return userService.landing(id,request);
     }
 
     @PostMapping("/{id}/upload-profile-photo")
@@ -63,7 +65,7 @@ public class UserController {
      * */
 
     @PostMapping("/users/addUser")
-    public String addUser(
+    public ResponseEntity<UserDto> addUser(
             @RequestBody UserAddRequest userAddRequest
     ) {
         return userService.addUser(userAddRequest);
