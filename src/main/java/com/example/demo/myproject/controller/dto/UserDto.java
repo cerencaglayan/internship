@@ -10,10 +10,12 @@ import org.springframework.lang.Nullable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDto {
+    private Integer id;
     private String name;
     private String surname;
     private String email;
     private String role;
     private String department;
+    private String company;
     private byte[] image;
 }

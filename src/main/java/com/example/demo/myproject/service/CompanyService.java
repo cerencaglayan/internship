@@ -47,14 +47,22 @@ public class CompanyService {
 
     public ResponseEntity<Company> createCompany(CompanyDto companyDto) {
         Company company = new Company();
-        company.setName(companyDto.getName());
 
+
+        CompanyType companyType = companyTypeRepository.findByName(companyDto.getCompanyType());
+
+        Town town = townRepository.findByName(companyDto.getAddressTown());
+
+        company.setName(companyDto.getName());
+        company.setShortName(companyDto.getShortName());
+        company.setCompanyType(companyType);
+        company.setAddressStreet(companyDto.getAddressStreet());
+        company.setAddressTown(town);
         companyRepository.save(company);
 
-        return ResponseEntity
-                .ok()
+        return ResponseEntity.ok()
                 .body(company);
-    }
+        }
 
 
     public ResponseEntity<Company> deleteCompany(Integer id) {
@@ -87,7 +95,8 @@ public class CompanyService {
             company.setName(companyDetails.getName());
             company.setShortName(companyDetails.getShortName());
             company.setCompanyType(optionalCompanyType);
-            company.setAddressStreet(companyDetails.getAddressTown());
+            company.setAddressStreet(companyDetails.getAddressStreet());
+            company.setAddressTown(town);
             companyRepository.save(company);
             return ResponseEntity.ok()
                     .body(company);

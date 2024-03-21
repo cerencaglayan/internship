@@ -43,8 +43,38 @@ public class SecurityConfig {
                                 request
                                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                                         .requestMatchers("/", "/error").permitAll()
-                                        .requestMatchers("/api/v1/user/users/**").hasAnyRole("ADMIN")
-                                        .requestMatchers("/api/v1/user/**").authenticated()
+                                        .requestMatchers(HttpMethod.GET,"/api/v1/user/users","/api/v1/user/users/**").authenticated()
+                                        .requestMatchers(HttpMethod.PUT,"/api/v1/user/users","/api/v1/user/users/**").authenticated()
+                                        .requestMatchers(HttpMethod.POST,"/api/v1/user/users","/api/v1/user/users/**").authenticated()
+                                        .requestMatchers("/api/v1/user/users/**").hasAnyRole("ADMIN")                                        .requestMatchers(HttpMethod.GET,"/api/v1/user/users").authenticated()
+
+                                        .requestMatchers(HttpMethod.GET,"/api/v1/city","/api/v1/city/**").authenticated()
+                                        .requestMatchers(HttpMethod.PUT,"/api/v1/city","/api/v1/city/**").authenticated()
+                                        .requestMatchers(HttpMethod.POST,"/api/v1/city","/api/v1/city/**").authenticated()
+                                        .requestMatchers("/api/v1/city/**").hasAnyRole("ADMIN")
+
+                                        .requestMatchers(HttpMethod.GET,"/api/v1/region","/api/v1/region/**").authenticated()
+                                        .requestMatchers(HttpMethod.PUT,"/api/v1/region","/api/v1/region/**").authenticated()
+                                        .requestMatchers(HttpMethod.POST,"/api/v1/region","/api/v1/region/**").authenticated()
+                                        .requestMatchers("/api/v1/region/**").hasAnyRole("ADMIN")
+
+                                        .requestMatchers(HttpMethod.GET,"/api/v1/town","/api/v1/town/**").authenticated()
+                                        .requestMatchers(HttpMethod.PUT,"/api/v1/town","/api/v1/town/**").authenticated()
+                                        .requestMatchers(HttpMethod.POST,"/api/v1/town","/api/v1/town/**").authenticated()
+                                        .requestMatchers("/api/v1/town/**").hasAnyRole("ADMIN")
+
+                                        .requestMatchers(HttpMethod.GET,"/api/v1/company","/api/v1/company/**").authenticated()
+                                        .requestMatchers(HttpMethod.PUT,"/api/v1/company","/api/v1/company/**").authenticated()
+                                        .requestMatchers(HttpMethod.POST,"/api/v1/company","/api/v1/company/**").authenticated()
+                                        .requestMatchers("/api/v1/company/**").hasAnyRole("ADMIN")
+
+
+
+
+
+
+
+
                                         .requestMatchers("/auth/**","/swagger-ui/**","/swagger-ui.html","/api-docs/**")
                                         .permitAll()
                                         .anyRequest().permitAll())

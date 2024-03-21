@@ -2,6 +2,7 @@ package com.example.demo.myproject.service;
 
 import com.example.demo.myproject.controller.dto.AuthenticationRequest;
 import com.example.demo.myproject.controller.dto.AuthenticationResponse;
+import com.example.demo.myproject.controller.dto.UserDto;
 import com.example.demo.myproject.exception.PasswordNotValidException;
 import com.example.demo.myproject.exception.TokenExpiredException;
 import com.example.demo.myproject.exception.UserAlreadyActiveException;
@@ -12,6 +13,7 @@ import com.example.demo.myproject.mail.token.ConfirmationTokenRepository;
 import com.example.demo.myproject.models.User;
 import com.example.demo.myproject.repository.UserRepository;
 import com.example.demo.myproject.repository.UserRoleRepository;
+import com.example.demo.myproject.service.utils.ImageUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -70,10 +72,30 @@ public class AuthenticationService {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + jwtToken);
 
+
+        String roleName = user.getUserRole() != null ? user.getUserRole().getName() : null;
+        String departmentName = user.getDepartment() != null ? user.getDepartment().getName() : null;
+        byte[] imageBytes = user.getImage() != null ? ImageUtils.decodeBase64String(user.getImage()) : null;
+        String companyName = user.getCompany() != null ? user.getCompany().getName() : null;
+
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .headers(headers)
-                .body(AuthenticationResponse.builder().token(jwtToken).build());
+                .body(AuthenticationResponse.builder()
+                                        .userDto(
+                        UserDto.builder()
+                                .id(user.getId())
+                                .name(user.getName())
+                                .surname(user.getSurname())
+                                .email(user.getEmail())
+                                .role(roleName)
+                                .department(departmentName)
+                                .company(companyName)
+                                .image(imageBytes)
+                                .build()
+                                        )
+                        .token("Bearer " + jwtToken).build());
     }
 
     /*

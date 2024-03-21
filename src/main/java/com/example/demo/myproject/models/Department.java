@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,8 @@ public class Department {
     private String addressStreet;
 
     @ManyToOne
-    @JoinColumn(name = "addressTown", nullable = false)
+    @JoinColumn(name = "addressTown", nullable = true)
+    @Nullable
     private Town addressTown;
 
 }

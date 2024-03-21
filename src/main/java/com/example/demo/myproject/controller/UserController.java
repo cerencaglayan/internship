@@ -59,10 +59,6 @@ public class UserController {
         }
     }
 
-    /*
-     * ADMIN AREA
-     *
-     * */
 
     @PostMapping("/users/addUser")
     public ResponseEntity<UserDto> addUser(
@@ -73,14 +69,21 @@ public class UserController {
 
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<UserDto>> getAllUsers(@NonNull HttpServletRequest request) {
+        return userService.getAllUsers(request);
     }
 
     @GetMapping("/users/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable("id") Integer id) {
         return userService.getUserById(id);
     }
-
+    @PutMapping("/users/{id}")
+    public ResponseEntity<UserDto> updateUserById(@PathVariable("id") Integer id,@RequestBody UserDto userDto) {
+        return userService.updateUserById(id,userDto);
+    }
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<UserDto> deleteUserById(@PathVariable("id") Integer id) {
+        return userService.deleteUserById(id);
+    }
 
 }

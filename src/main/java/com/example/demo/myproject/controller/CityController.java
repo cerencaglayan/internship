@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/city")
-@PreAuthorize("hasAnyRole('ADMIN')")
 public class CityController {
 
     private final CityService cityService;

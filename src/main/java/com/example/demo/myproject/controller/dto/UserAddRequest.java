@@ -21,6 +21,7 @@ public class UserAddRequest {
     private String password;
     private String role;
     private String department;
+    private String company;
 
 
 }

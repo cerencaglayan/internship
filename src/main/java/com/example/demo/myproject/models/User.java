@@ -30,6 +30,10 @@ public class User implements UserDetails {
     @JoinColumn(name = "departmentId")
     private Department department;
 
+    @ManyToOne
+    @JoinColumn(name = "companyId")
+    private Company company;
+
     private String name;
 
     private String surname;

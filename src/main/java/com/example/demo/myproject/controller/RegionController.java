@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/region")
-@PreAuthorize("hasAnyRole('ADMIN')")
 public class RegionController {
     private final RegionService regionService;
 

@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/town")
-@PreAuthorize("hasAnyRole('ADMIN')")
 public class TownController {
     private final TownService townService;
 

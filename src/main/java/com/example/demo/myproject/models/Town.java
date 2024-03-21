@@ -32,5 +32,6 @@ public class Town {
 
 
     public Town(String name) {
+        setName(name);
     }
 }
